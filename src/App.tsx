@@ -78,12 +78,13 @@ export const App: React.FC = () => {
 
   const checkAllTodos = () => {
     const newCheckedAll = !checkedAll;
+
     setCheckedAll(newCheckedAll);
-    setTodos(prev =>
-      prev?.map(todo => ({ ...todo, completed: newCheckedAll })) ?? null
+    setTodos(
+      prev =>
+        prev?.map(todo => ({ ...todo, completed: newCheckedAll })) ?? null,
     );
   };
-
 
   const handleFilter = (): Todo[] | null => {
     if (!todos) {
