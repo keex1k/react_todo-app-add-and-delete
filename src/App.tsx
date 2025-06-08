@@ -18,6 +18,8 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<string>('all');
 
+  const [shouldFetch, setShouldFetch] = useState(false);
+
   const clearError = () => {
     setError('');
   };
@@ -26,9 +28,10 @@ export const App: React.FC = () => {
     getTodos()
       .then(data => {
         setTodos(data ?? null);
+        setShouldFetch(false);
       })
       .catch(() => setError('load'));
-  }, [todos]);
+  }, [shouldFetch]);
 
   useEffect(() => {
     if (error) {
@@ -70,6 +73,7 @@ export const App: React.FC = () => {
     }
 
     setNewTodo('');
+    setShouldFetch(true);
   };
 
   const checkTodo = (todoId: number) => {
@@ -82,6 +86,7 @@ export const App: React.FC = () => {
     const newCompletedStatus = !todoToUpdate.completed;
 
     updateTodo(todoId, { completed: newCompletedStatus });
+    setShouldFetch(true);
   };
 
   const checkAllTodos = () => {
@@ -99,6 +104,8 @@ export const App: React.FC = () => {
         ),
       ),
     );
+
+    setShouldFetch(true);
   };
 
   const handleFilter = (): Todo[] | null => {
@@ -119,6 +126,7 @@ export const App: React.FC = () => {
 
   const delTodo = (todoId: number) => {
     deleteTodo(todoId);
+    setShouldFetch(true);
   };
 
   const deleteCompletedTodos = (t: Todo[]) => {
@@ -127,7 +135,7 @@ export const App: React.FC = () => {
         deleteTodo(t[i].id);
       }
     }
-
+    setShouldFetch(true);
     //setTodos(todos)
   };
 
