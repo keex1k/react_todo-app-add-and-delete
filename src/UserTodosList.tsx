@@ -4,9 +4,10 @@ import classNames from 'classnames';
 type Props = {
   todos: Todo[] | null;
   onChecked: (todoId: number) => void;
+  onDeleted: (todoId: number) => void;
 };
 
-export const UserTodosList = ({ todos, onChecked }: Props) => {
+export const UserTodosList = ({ todos, onChecked, onDeleted }: Props) => {
   if (!todos) {
     return null;
   }
@@ -36,7 +37,12 @@ export const UserTodosList = ({ todos, onChecked }: Props) => {
           <span data-cy="TodoTitle" className="todo__title">
             {todo.title}
           </span>
-          <button type="button" className="todo__remove" data-cy="TodoDelete">
+          <button
+            type="button"
+            className="todo__remove"
+            data-cy="TodoDelete"
+            onClick={() => onDeleted(todo.id)}
+          >
             ×
           </button>
 

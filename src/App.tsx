@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { UserWarning } from './UserWarning';
-import { addTodos, getTodos, USER_ID } from './api/todos';
+import {
+  addTodos,
+  getTodos,
+  USER_ID,
+  deleteTodo,
+  updateTodo,
+} from './api/todos';
 import { UserTodosList } from './UserTodosList';
 import { Todo } from './types/Todo';
 import { ErrorMessage } from './ErrorMessage';
@@ -23,7 +29,7 @@ export const App: React.FC = () => {
         setTodos(data ?? null);
       })
       .catch(() => setError('load'));
-  }, []);
+  }, [todos]);
 
   useEffect(() => {
     if (error) {
@@ -68,12 +74,7 @@ export const App: React.FC = () => {
   };
 
   const checkTodo = (todoId: number) => {
-    setTodos(
-      prev =>
-        prev?.map(todo =>
-          todo.id === todoId ? { ...todo, completed: !todo.completed } : todo,
-        ) ?? null,
-    );
+    updateTodo(todoId, { completed: true });
   };
 
   const checkAllTodos = () => {
@@ -100,6 +101,20 @@ export const App: React.FC = () => {
     }
 
     return todos;
+  };
+
+  const delTodo = (todoId: number) => {
+    deleteTodo(todoId);
+  };
+
+  const deleteCompletedTodos = (t: Todo[]) => {
+    for (let i = 0; i < t.length; i++) {
+      if (t[i].completed === true) {
+        deleteTodo(t[i].id);
+      }
+    }
+
+    //setTodos(todos)
   };
 
   const finalTodos: Todo[] | null = handleFilter();
@@ -130,7 +145,11 @@ export const App: React.FC = () => {
         </header>
 
         <section className="todoapp__main" data-cy="TodoList">
-          <UserTodosList todos={finalTodos} onChecked={checkTodo} />
+          <UserTodosList
+            todos={finalTodos}
+            onChecked={checkTodo}
+            onDeleted={delTodo}
+          />
         </section>
 
         {todos && todos.length > 0 && (
@@ -183,6 +202,7 @@ export const App: React.FC = () => {
               type="button"
               className="todoapp__clear-completed"
               data-cy="ClearCompletedButton"
+              onClick={() => deleteCompletedTodos(todos)}
             >
               Clear completed
             </button>
