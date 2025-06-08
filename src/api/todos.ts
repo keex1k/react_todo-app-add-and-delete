@@ -15,6 +15,10 @@ export const updateTodo = (todoId: number, todoProp: Partial<Todo>) => {
   return client.patch(`/todos/${todoId}`, todoProp);
 };
 
+export const updateTodos = (todoProp: Partial<Todo>) => {
+  return client.patch(`/todos?userId=${USER_ID}`, todoProp);
+};
+
 export const deleteTodo = (todoId: number) => {
   return client.delete(`/todos/${todoId}`);
 };

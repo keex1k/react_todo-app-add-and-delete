@@ -15,7 +15,6 @@ import classNames from 'classnames';
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[] | null>(null);
   const [newTodo, setNewTodo] = useState<string>('');
-  const [checkedAll, setCheckedAll] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<string>('all');
 
@@ -74,16 +73,31 @@ export const App: React.FC = () => {
   };
 
   const checkTodo = (todoId: number) => {
-    updateTodo(todoId, { completed: true });
+    const todoToUpdate = todos?.find(todo => todo.id === todoId);
+
+    if (!todoToUpdate) {
+      return;
+    }
+
+    const newCompletedStatus = !todoToUpdate.completed;
+
+    updateTodo(todoId, { completed: newCompletedStatus });
   };
 
   const checkAllTodos = () => {
-    const newCheckedAll = !checkedAll;
+    if (!todos) {
+      return;
+    }
 
-    setCheckedAll(newCheckedAll);
-    setTodos(
-      prev =>
-        prev?.map(todo => ({ ...todo, completed: newCheckedAll })) ?? null,
+    const allCompleted = todos.every(todo => todo.completed);
+    const newCompletedStatus = !allCompleted;
+
+    Promise.all(
+      todos.map(todo =>
+        updateTodo(todo.id, { completed: newCompletedStatus }).catch(() =>
+          setError('update'),
+        ),
+      ),
     );
   };
 
