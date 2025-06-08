@@ -135,6 +135,7 @@ export const App: React.FC = () => {
         deleteTodo(t[i].id);
       }
     }
+
     setShouldFetch(true);
     //setTodos(todos)
   };
