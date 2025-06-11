@@ -4,21 +4,19 @@ import {
   addTodos,
   getTodos,
   USER_ID,
-  deleteTodo,
-  updateTodo,
+  //deleteTodo,
+  //updateTodo,
 } from './api/todos';
 import { UserTodosList } from './UserTodosList';
 import { Todo } from './types/Todo';
 import { ErrorMessage } from './ErrorMessage';
-import classNames from 'classnames';
+import { Footer } from './Footer';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[] | null>(null);
   const [newTodo, setNewTodo] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<string>('all');
-
-  const [shouldFetch, setShouldFetch] = useState(false);
 
   const clearError = () => {
     setError('');
@@ -28,10 +26,9 @@ export const App: React.FC = () => {
     getTodos()
       .then(data => {
         setTodos(data ?? null);
-        setShouldFetch(false);
       })
       .catch(() => setError('load'));
-  }, [shouldFetch]);
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -41,8 +38,6 @@ export const App: React.FC = () => {
 
       return () => clearTimeout(timer);
     }
-
-    return undefined;
   }, [error]);
 
   if (!USER_ID) {
@@ -73,8 +68,24 @@ export const App: React.FC = () => {
     }
 
     setNewTodo('');
-    setShouldFetch(true);
   };
+
+  const handleFilter = (): Todo[] | null => {
+    if (!todos) {
+      return null;
+    }
+
+    if (filter === 'active') {
+      return todos.filter(t => !t.completed);
+    }
+
+    if (filter === 'completed') {
+      return todos.filter(t => t.completed);
+    }
+
+    return todos;
+  };
+  /*
 
   const checkTodo = (todoId: number) => {
     const todoToUpdate = todos?.find(todo => todo.id === todoId);
@@ -108,22 +119,6 @@ export const App: React.FC = () => {
     setShouldFetch(true);
   };
 
-  const handleFilter = (): Todo[] | null => {
-    if (!todos) {
-      return null;
-    }
-
-    if (filter === 'active') {
-      return todos.filter(t => !t.completed);
-    }
-
-    if (filter === 'completed') {
-      return todos.filter(t => t.completed);
-    }
-
-    return todos;
-  };
-
   const delTodo = (todoId: number) => {
     deleteTodo(todoId);
     setShouldFetch(true);
@@ -138,7 +133,7 @@ export const App: React.FC = () => {
 
     setShouldFetch(true);
     //setTodos(todos)
-  };
+  };*/
 
   const finalTodos: Todo[] | null = handleFilter();
 
@@ -152,7 +147,7 @@ export const App: React.FC = () => {
             type="button"
             className="todoapp__toggle-all active"
             data-cy="ToggleAllButton"
-            onClick={() => checkAllTodos()}
+            //onClick={() => checkAllTodos()}
           />
 
           <form onSubmit={handleSubmit}>
@@ -170,66 +165,13 @@ export const App: React.FC = () => {
         <section className="todoapp__main" data-cy="TodoList">
           <UserTodosList
             todos={finalTodos}
-            onChecked={checkTodo}
-            onDeleted={delTodo}
+            //onChecked={checkTodo}
+            //onDeleted={delTodo}
           />
         </section>
 
         {todos && todos.length > 0 && (
-          <footer className="todoapp__footer" data-cy="Footer">
-            <span className="todo-count" data-cy="TodosCounter">
-              {todos
-                ? todos.filter(todo => !todo.completed).length + ' items left'
-                : ''}
-            </span>
-
-            <nav className="filter" data-cy="Filter">
-              <a
-                href="#/"
-                className={classNames({
-                  filter__link: true,
-                  selected: filter === 'all',
-                })}
-                data-cy="FilterLinkAll"
-                onClick={() => setFilter('all')}
-              >
-                All
-              </a>
-
-              <a
-                href="#/active"
-                className={classNames({
-                  filter__link: true,
-                  selected: filter === 'active',
-                })}
-                data-cy="FilterLinkActive"
-                onClick={() => setFilter('active')}
-              >
-                Active
-              </a>
-
-              <a
-                href="#/completed"
-                className={classNames({
-                  filter__link: true,
-                  selected: filter === 'completed',
-                })}
-                data-cy="FilterLinkCompleted"
-                onClick={() => setFilter('completed')}
-              >
-                Completed
-              </a>
-            </nav>
-
-            <button
-              type="button"
-              className="todoapp__clear-completed"
-              data-cy="ClearCompletedButton"
-              onClick={() => deleteCompletedTodos(todos)}
-            >
-              Clear completed
-            </button>
-          </footer>
+          <Footer filter={filter} filterTodos={todos} setFilter={setFilter} />
         )}
       </div>
       <ErrorMessage error={error} onClear={clearError} />
