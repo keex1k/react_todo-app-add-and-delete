@@ -9,7 +9,12 @@ type Props = {
   deleteCompleted: () => void;
 };
 
-export const Footer = ({ filter, filterTodos, setFilter, deleteCompleted }: Props) => {
+export const Footer = ({
+  filter,
+  filterTodos,
+  setFilter,
+  deleteCompleted,
+}: Props) => {
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">

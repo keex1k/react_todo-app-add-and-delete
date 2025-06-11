@@ -18,7 +18,7 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<string>('all');
 
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const clearError = () => {
     setError('');
@@ -95,6 +95,7 @@ export const App: React.FC = () => {
       .then(() => {
         if (todos) {
           const updatedTodos = todos.filter(todo => todo.id !== todoId);
+
           setTodos(updatedTodos);
         }
       })
