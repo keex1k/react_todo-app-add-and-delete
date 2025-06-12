@@ -12,6 +12,8 @@ import { Todo } from './types/Todo';
 import { ErrorMessage } from './ErrorMessage';
 import { Footer } from './Footer';
 
+export type TodoInput = Omit<Todo, 'id'>;
+
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[] | null>(null);
   const [newTodo, setNewTodo] = useState<string>('');
@@ -48,31 +50,38 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setNewTodo(newTodo);
+const handleSubmit = (event: React.FormEvent) => {
+  event.preventDefault();
 
-    const newTodoObject: Todo = {
-      userId: USER_ID,
-      title: newTodo,
-      completed: false,
-      id: todos !== null ? todos.length + 1 : 1,
-    };
+  if (newTodo.trim().length === 0) {
+    setError('empty title');
+    return;
+  }
 
-    if (newTodo.trim().length === 0) {
-      setError('empty title');
-    } else {
-      if (todos) {
-        setTodos([...todos, newTodoObject]);
-      } else {
-        setTodos([newTodoObject]);
-      }
-
-      addTodos(newTodoObject).catch(() => setError('add'));
-    }
-
-    setNewTodo('');
+  const todoToSend: TodoInput = {
+    userId: USER_ID,
+    title: newTodo,
+    completed: false,
   };
+
+  const optimisticTodo: Todo = {
+    ...todoToSend,
+    id: Date.now(), // tymczasowy ID
+  };
+
+  // Dodaj do UI
+  setTodos(prev => (prev ? [...prev, optimisticTodo] : [optimisticTodo]));
+
+  // Wyślij do backendu
+  addTodos(todoToSend)
+    .then(() => {
+      // ewentualnie odśwież listę getTodos() jeśli chcesz mieć prawdziwy `id`
+    })
+    .catch(() => setError('add'));
+
+  setNewTodo('');
+};
+
 
   const handleFilter = (): Todo[] | null => {
     if (!todos) {
