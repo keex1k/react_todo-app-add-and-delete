@@ -16,7 +16,7 @@ export type TodoInput = Omit<Todo, 'id'>;
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[] | null>(null);
-  const [newTodo, setNewTodo] = useState<string>('');
+  const [title, setTitle] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<string>('all');
 
@@ -53,34 +53,30 @@ export const App: React.FC = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (newTodo.trim().length === 0) {
+    if (title.trim().length === 0) {
       setError('empty title');
 
       return;
     }
 
-    const todoToSend: TodoInput = {
+    let newTempTodo: Todo | null = {
+      id: 0,
       userId: USER_ID,
-      title: newTodo,
+      title: title,
       completed: false,
     };
 
-    const optimisticTodo: Todo = {
-      ...todoToSend,
-      id: Date.now(), // tymczasowy ID
-    };
+    setTitle('');
 
-    // Dodaj do UI
-    setTodos(prev => (prev ? [...prev, optimisticTodo] : [optimisticTodo]));
-
-    // Wyślij do backendu
-    addTodos(todoToSend)
-      .then(() => {
-        // ewentualnie odśwież listę getTodos() jeśli chcesz mieć prawdziwy `id`
+    addTodos(newTempTodo)
+      .then(newTodoFromAPI => {
+        setTodos(prev => (prev ? [...prev, newTodoFromAPI] : [newTodoFromAPI]));
+        newTempTodo = null;
       })
-      .catch(() => setError('add'));
-
-    setNewTodo('');
+      .catch(() => {
+        setError('add');
+        newTempTodo = null;
+      });
   };
 
   const handleFilter = (): Todo[] | null => {
@@ -187,8 +183,8 @@ export const App: React.FC = () => {
               type="text"
               className="todoapp__new-todo"
               placeholder="What needs to be done?"
-              value={newTodo}
-              onChange={e => setNewTodo(e.target.value)}
+              value={title}
+              onChange={e => setTitle(e.target.value)}
             />
           </form>
         </header>
