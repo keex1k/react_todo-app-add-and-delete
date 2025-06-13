@@ -19,6 +19,7 @@ export const App: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<string>('all');
+  const [isCreating, setIsCreating] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -62,20 +63,27 @@ export const App: React.FC = () => {
     let newTempTodo: Todo | null = {
       id: 0,
       userId: USER_ID,
-      title: title,
+      title: title.trim(),
       completed: false,
     };
 
     setTitle('');
 
+    setIsCreating(true);
     addTodos(newTempTodo)
       .then(newTodoFromAPI => {
         setTodos(prev => (prev ? [...prev, newTodoFromAPI] : [newTodoFromAPI]));
         newTempTodo = null;
+        inputRef.current?.focus();
+        setTitle('');
       })
       .catch(() => {
         setError('add');
         newTempTodo = null;
+        inputRef.current?.focus();
+      })
+      .finally(() => {
+        setIsCreating(false);
       });
   };
 
@@ -185,6 +193,7 @@ export const App: React.FC = () => {
               placeholder="What needs to be done?"
               value={title}
               onChange={e => setTitle(e.target.value)}
+              disabled={isCreating}
             />
           </form>
         </header>
