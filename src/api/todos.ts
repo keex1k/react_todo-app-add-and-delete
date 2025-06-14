@@ -8,7 +8,7 @@ export const getTodos = () => {
 };
 
 export const addTodos = (todo: Todo) => {
-  return client.post<Todo>(`/todos?userId=${USER_ID}`, todo);
+  return client.post<Todo>(`/todos`, todo);
 };
 
 export const updateTodo = (todoId: number, todoProp: Partial<Todo>) => {

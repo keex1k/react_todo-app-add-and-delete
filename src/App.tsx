@@ -20,6 +20,13 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<string>('all');
   const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [tempTodo, setTempTodo] = useState<Todo>({
+    id: 0,
+    userId: USER_ID,
+    title: '',
+    completed: false,
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,9 +40,11 @@ export const App: React.FC = () => {
         setTodos(data ?? null);
       })
       .catch(() => setError('load'));
-
-    inputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [todos]);
 
   useEffect(() => {
     if (error) {
@@ -60,31 +69,27 @@ export const App: React.FC = () => {
       return;
     }
 
-    let newTempTodo: Todo | null = {
-      id: 0,
-      userId: USER_ID,
-      title: title.trim(),
-      completed: false,
-    };
-
-    setTitle('');
-
     setIsCreating(true);
-    addTodos(newTempTodo)
-      .then(newTodoFromAPI => {
-        setTodos(prev => (prev ? [...prev, newTodoFromAPI] : [newTodoFromAPI]));
-        newTempTodo = null;
-        inputRef.current?.focus();
-        setTitle('');
-      })
-      .catch(() => {
-        setError('add');
-        newTempTodo = null;
-        inputRef.current?.focus();
-      })
-      .finally(() => {
-        setIsCreating(false);
-      });
+
+    if (tempTodo !== null) {
+      addTodos({ ...tempTodo, title: title.trim() })
+        .then(newTodoFromAPI => {
+          setTodos(prev =>
+            prev ? [...prev, newTodoFromAPI] : [newTodoFromAPI],
+          );
+          setTempTodo({ id: 0, userId: USER_ID, title: '', completed: false });
+          setTimeout(() => inputRef.current?.focus(), 0);
+          setTitle('');
+        })
+        .catch(() => {
+          setError('add');
+          setTempTodo({ id: 0, userId: USER_ID, title: '', completed: false });
+          setTimeout(() => inputRef.current?.focus(), 0);
+        })
+        .finally(() => {
+          setIsCreating(false);
+        });
+    }
   };
 
   const handleFilter = (): Todo[] | null => {
@@ -104,6 +109,7 @@ export const App: React.FC = () => {
   };
 
   const delTodo = (todoId: number) => {
+    setIsDeleting(true)
     deleteTodo(todoId)
       .then(() => {
         if (todos) {
@@ -112,7 +118,10 @@ export const App: React.FC = () => {
           setTodos(updatedTodos);
         }
       })
-      .catch(() => setError('delete'));
+      .catch(() => setError('delete'))
+      .finally(() => {
+        setIsDeleting(false)
+      })
   };
 
   const deleteCompletedTodos = () => {
@@ -192,7 +201,9 @@ export const App: React.FC = () => {
               className="todoapp__new-todo"
               placeholder="What needs to be done?"
               value={title}
-              onChange={e => setTitle(e.target.value)}
+              onChange={e => {
+                setTitle(e.target.value);
+              }}
               disabled={isCreating}
             />
           </form>
@@ -203,7 +214,16 @@ export const App: React.FC = () => {
             todos={finalTodos}
             //onChecked={checkTodo}
             onDeleted={delTodo}
+            isDeleting={isDeleting}
           />
+          {isCreating && (
+            <UserTodosList
+              todos={[{ ...tempTodo, title: title }]}
+              //onChecked={checkTodo}
+              onDeleted={delTodo}
+              isLoading={isCreating}
+            />
+          )}
         </section>
 
         {todos && todos.length > 0 && (

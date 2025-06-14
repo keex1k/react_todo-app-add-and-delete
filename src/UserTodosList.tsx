@@ -6,9 +6,17 @@ type Props = {
   todos: Todo[] | null;
   //onChecked: (todoId: number) => void;
   onDeleted: (todoId: number) => void;
+  isLoading?: boolean;
+  isDeleting?: boolean;
+  tempTodo?: Todo;
 };
 
-export const UserTodosList = ({ todos /*, onChecked*/, onDeleted }: Props) => {
+export const UserTodosList = ({
+  todos /*, onChecked*/,
+  onDeleted,
+  isLoading = false,
+  isDeleting = false,
+}: Props) => {
   if (!todos) {
     return null;
   }
@@ -43,11 +51,17 @@ export const UserTodosList = ({ todos /*, onChecked*/, onDeleted }: Props) => {
             className="todo__remove"
             data-cy="TodoDelete"
             onClick={() => onDeleted(todo.id)}
+            disabled={isDeleting || isLoading}
           >
             ×
           </button>
 
-          <div data-cy="TodoLoader" className="modal overlay">
+          <div
+            data-cy="TodoLoader"
+            className={classNames('modal overlay', {
+              'is-active': isLoading || isDeleting,
+            })}
+          >
             <div className="modal-background has-background-white-ter" />
             <div className="loader" />
           </div>
