@@ -15,6 +15,9 @@ export const Footer = ({
   setFilter,
   deleteCompleted,
 }: Props) => {
+
+  const completedTodos = filterTodos?.filter(todo => todo.completed === true);
+
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
@@ -67,6 +70,7 @@ export const Footer = ({
         className="todoapp__clear-completed"
         data-cy="ClearCompletedButton"
         onClick={deleteCompleted}
+        disabled={completedTodos?.length === 0}
       >
         Clear completed
       </button>

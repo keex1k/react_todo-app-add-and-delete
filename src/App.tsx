@@ -109,7 +109,7 @@ export const App: React.FC = () => {
   };
 
   const delTodo = (todoId: number) => {
-    setIsDeleting(true)
+    setIsDeleting(true);
     deleteTodo(todoId)
       .then(() => {
         if (todos) {
@@ -120,8 +120,8 @@ export const App: React.FC = () => {
       })
       .catch(() => setError('delete'))
       .finally(() => {
-        setIsDeleting(false)
-      })
+        setIsDeleting(false);
+      });
   };
 
   const deleteCompletedTodos = () => {
@@ -130,15 +130,22 @@ export const App: React.FC = () => {
     }
 
     const completedTodos = todos.filter(todo => todo.completed === true);
-    const updatedTodos = todos.filter(uTodo => uTodo.completed === false);
-
-    Promise.all(
-      completedTodos.map(todo =>
-        deleteTodo(todo.id).catch(() => setError('delete')),
-      ),
+    Promise.allSettled(
+      completedTodos.map(todo => deleteTodo(todo.id)),
     )
-      .catch(() => setError('delete'))
-      .then(() => {
+      .then(results => {
+        const failedIds = completedTodos
+          .filter((_, index) => results[index].status === 'rejected')
+          .map(todo => todo.id);
+
+        if (failedIds.length > 0) {
+          setError('delete');
+        }
+
+        const updatedTodos = todos.filter(
+          todo => !todo.completed || failedIds.includes(todo.id),
+        );
+
         setTodos(updatedTodos);
       });
   };
