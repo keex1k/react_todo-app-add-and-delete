@@ -130,10 +130,9 @@ export const App: React.FC = () => {
     }
 
     const completedTodos = todos.filter(todo => todo.completed === true);
-    Promise.allSettled(
-      completedTodos.map(todo => deleteTodo(todo.id)),
-    )
-      .then(results => {
+
+    Promise.allSettled(completedTodos.map(todo => deleteTodo(todo.id))).then(
+      results => {
         const failedIds = completedTodos
           .filter((_, index) => results[index].status === 'rejected')
           .map(todo => todo.id);
@@ -147,7 +146,8 @@ export const App: React.FC = () => {
         );
 
         setTodos(updatedTodos);
-      });
+      },
+    );
   };
   /*
 

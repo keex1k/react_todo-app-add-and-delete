@@ -15,7 +15,6 @@ export const Footer = ({
   setFilter,
   deleteCompleted,
 }: Props) => {
-
   const completedTodos = filterTodos?.filter(todo => todo.completed === true);
 
   return (
